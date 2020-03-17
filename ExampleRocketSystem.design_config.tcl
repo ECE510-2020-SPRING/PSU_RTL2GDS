@@ -37,5 +37,4 @@ set lib_types "stdcell_hvt stdcell_rvt stdcell_lvt sram_lp"
 set sub_lib_type "saed32?vt_ saed32sram_"
 
 #set topdir /u/$env(USER)/PSU_RTL2GDS
-set topdir [ regexp -inline "(.*)\?syn\|pt\|apr" [pwd] ]
-
+set topdir [ lindex [ regexp -inline "(.*)\(syn\|pt\|apr\)" [pwd] ] 1 ]

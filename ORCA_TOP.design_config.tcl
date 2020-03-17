@@ -56,6 +56,6 @@ if { 0 } {
 }
 
 #set topdir /u/$env(USER)/PSU_RTL2GDS
-set topdir [ regexp -inline "(.*)\?syn\|pt\|apr" [pwd] ]
+set topdir [ lindex [ regexp -inline "(.*)\(syn\|pt\|apr\)" [pwd] ] 1 ]
 
 
