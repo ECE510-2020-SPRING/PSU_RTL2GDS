@@ -15,6 +15,8 @@ Common Commands:
   - to commit changes to the repository
 - git push -u origin master
   - to push the files to github
+- git pull
+  - pull all the changes that are in the repository to your local directories.
 - git config --global user.name "username"
 - git config --global user.password "password
 - git config --global user.email "user@pdx.edu"
