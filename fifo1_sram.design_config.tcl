@@ -36,6 +36,7 @@ set lib_types "stdcell_hvt stdcell_rvt stdcell_lvt io_std sram"
 # Get just the main standard cells, srams and IOs
 set sub_lib_type "saed32?vt_ saed32sram_ saed32io_wb_"
 
-set topdir /u/$env(USER)/PSU_RTL2GDS
+#set topdir /u/$env(USER)/PSU_RTL2GDS
+set topdir [ regexp -inline "(.*)\?syn\|pt\|apr" [pwd] ]
 
 

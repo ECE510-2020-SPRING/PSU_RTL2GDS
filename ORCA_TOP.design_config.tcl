@@ -55,6 +55,7 @@ if { 0 } {
     set sub_lib_type "saed32?vt_ saed32?vt_ulvl_ saed32?vt_dlvl_ saed32sram_"
 }
 
-set topdir /u/$env(USER)/PSU_RTL2GDS
+#set topdir /u/$env(USER)/PSU_RTL2GDS
+set topdir [ regexp -inline "(.*)\?syn\|pt\|apr" [pwd] ]
 
 
