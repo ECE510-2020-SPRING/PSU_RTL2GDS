@@ -3,7 +3,7 @@
 This GIT repository:  https://github.com/bcruik2/PSU_RTL2GDS.git
 
 Common Commands:
-git clone https://github.com/RISC-V-PSU-Project/RISC_V_Project
+git clone https://github.com/bcruik2/PSU_RTL2GDS.git
         Clone into a directory at your present location.
 git status
         to see changes you have made since last commit
