@@ -1,12 +1,12 @@
 #set topdir /u/$env(USER)/PSU_RTL2GDS
-set topdir [ regexp -inline "(.*)\?syn\|pt\|apr" [pwd] ]
+set topdir [lindex [ regexp -inline "(.*)pt" [pwd] ] 1 ]
 
 
 source $topdir/$top_design.design_config.tcl
 
 set corners $slow_corner
 
-source $topdir/pt/scripts/pt-get-timlibs.tcl
+source -echo -verbose $topdir/pt/scripts/pt-get-timlibs.tcl
 
 read_verilog $topdir/apr/outputs/${top_design}.route2.vg
 #read_verilog ../../apr/outputs/${top_design}.route2.vg
