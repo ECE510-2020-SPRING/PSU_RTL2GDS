@@ -1,4 +1,5 @@
-set topdir /u/$env(USER)/PSU_RTL2GDS
+#set topdir /u/$env(USER)/PSU_RTL2GDS
+set topdir [ regexp -inline "(.*)\?syn\|pt\|apr" [pwd] ]
 
 source $topdir/$top_design.design_config.tcl
 
