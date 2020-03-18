@@ -1,0 +1,74 @@
+# Run DC Shell to generate a starting netlist non-physical synthesis.
+cd ~/PSU_RTL2GDS/syn/work
+dc_shell 
+# Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup
+f
+source ../scripts/dc.tcl
+# it is recommended to exit the shell before sourcing the TCL script again.
+exit
+
+# Run ICC to generate a starting Floorplan with IOs for use in DCT.  Also a spot to move macros around and save results.
+cd ../../apr/work
+icc_shell2
+# Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup
+f
+source ../scripts/floorplan-macros2.tcl
+exit
+
+# Run ICC to generate a floorplan for DCT
+cd ../../apr/work
+icc_shell2
+# Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup
+f
+source ../scripts/create_dct_floorplan2.tcl
+exit
+
+# Rerun synthesis with Physically aware DCT
+cd ../../syn/work
+dc_shell -topo
+# Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup
+f
+source ../scripts/dct.tcl
+# it is recommended to exit the shell before sourcing the TCL script again.
+exit
+
+# Rerun ICC and start with the DCT netlist and proceed through full ICC flow
+cd ../../apr/work
+icc_shell2
+# Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup
+f
+# If you only want to run part of the flow, you can set flow "fpcr"  where f=floorplan, p=place, c=clock, r=route.
+source ../scripts/icc2.tcl
+# If you rerun flow, either close_lib, then rerun, or exit the icc2_shell and reenter.
+exit
+
+# Check results in Primetime Static Timing Analysis in 3 modes
+# Follow directions at pt/scripts/README.DMSA.SSH 
+cd ../../pt/work
+
+# FOR DMSA setup and hold combined use if you have been successful with README.DMSA.SSH 
+pt_shell -multi_scenario
+# Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup
+f
+source ../scripts/dmsa.tcl
+exit
+
+# If you are not successful yet with README.DMSA.SSH 
+pt_shell 
+f
+source ../scripts/pt_max.tcl
+exit
+pt_shell
+f
+source ../sripts/pt_min.tcl
+exit
+
+#########################################################
+For selecting the design type to do your synth or ICC2 or PT runs on,
+you can type "f" for fifo1
+you can type "e" for RiscV ExampleRocketSystem.
+you can type "o" for ORCA_TOP.  
+    For ORCA_TOP, the current RTL does not have macros, but the input to ICC2 does have macros.
+    I have only run dc_shell with RTL.  Otherwise, I have always run ICC2.
+That will change the design_top variable through an alias set up in .synopsys*.setup in your current work directory.
+
