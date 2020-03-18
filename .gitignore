@@ -1,5 +1,7 @@
 *.rpt
-*.log
+*.log*
 *~
 *.ddc
+*.cmd*
+*.mw
 
