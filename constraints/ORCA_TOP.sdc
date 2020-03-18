@@ -16,12 +16,28 @@ switch $synopsys_program_name {
 
     #set_scenario_status  default -active false
     set_scenario_status func_slow -active true -hold true -setup true
-    source ../../syn/outputs/ORCA_TOP.dc.upf.place_2020
+
+    # If the flow variable is set, then we should be in regular APR flow and not the macro floorplanning mode
+    # We want to use the UPF associated with the correct netlist.  APR flow uses DCT output.  Macro fp uses DC output.
+    if { [info exists flow ] } {
+        source ../../syn/outputs/ORCA_TOP.dct.upf
+    } else {
+        source ../../syn/outputs/ORCA_TOP.dc.upf
+    }
+
     source ../../constraints/ORCA_TOP_func_worst.sdc
  }
  "dc_shell" {
+     set upf_create_implicit_supply_sets false
+    source ../../constraints/ORCA_TOP.upf
     set_operating_conditions ss0p75vn40c -library saed32lvt_ss0p75vn40c
     source ../../constraints/ORCA_TOP_func_worst.sdc
+
+    # Define voltage area for DCT mode.  We define the mw_lib variable in DCT mode script.
+    # In the ICC2_flow it is defined in ORCA_TOP.design_options.tcl. Slightly different syntax.
+    if { [ info exists mw_lib ] } {
+       create_voltage_area  -coordinate {{580 0} {1000 400}} -power_domain PD_RISC_CORE
+    }
  }
  "pt_shell" {
     source $topdir/apr/outputs/ORCA_TOP.route2.upf

@@ -61,7 +61,3 @@ set_clock_routing_rules -clock [ get_clocks * ] -net_type root -rule clock_doubl
 set_app_option -name route_opt.flow.xtalk_reduction -value true
 set_app_option -name time.si_enable_analysis -value true
 
-if { $top_design == "ORCA_TOP" } {
-  create_voltage_area  -region {{580 0} {1000 400}} -power_domains PD_RISC_CORE
-}
-
