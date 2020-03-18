@@ -1,7 +1,7 @@
 # start pt_shell -multi_scenario
 # Then source this script
 #set topdir /u/$env(USER)/PSU_RTL2GDS
-set topdir [ regexp -inline "(.*)\?syn\|pt\|apr" [pwd] ]
+set topdir [lindex [ regexp -inline "(.*)pt" [pwd] ] 1 ]
 
 set multi_scenario_working_directory "./ms_session_1"
 set multi_scenario_merged_error_log  "merged_errors.log"
