@@ -4,6 +4,12 @@
 ## you must start innovus from the INNOVUS area and not the GENUS area
 ## /pkgs/cadence/2019-03/INNOVUS171/bin/innovus
 ## not /pkgs/cadence/2019-03/GENUS171/bin/innovus
+##
+## You need this as well in your .profile to get your libraries loaded correctly
+## LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/pkgs/cadence/2019-03/SSV171/tools.lnx86/lib/64bit/"
+## You might see this error otherwise.
+## **ERROR: (IMPCCOPT-3092):	Couldn't load external LP solver library. Error returned:
+
 
 source -echo -verbose ../../$top_design.design_config.tcl
 
@@ -36,8 +42,12 @@ set init_top_cell $top_design
 set init_pwr_net VDD
 set init_gnd_net VSS
 set init_mmmc_file mmmc.tcl
+
 # Currently copy all the lef files from original locations and delete the BUSBITCHARS lines.  The "_" of  "_<>" is a problem.
-set init_lef_file "../../cadence_cap_tech/tech.lef [glob *.lef]"
+foreach i $lef_path {
+   exec grep -v BUSBITCHARS $i > [file tail $i ]
+}
+set init_lef_file "../../cadence_cap_tech/tech.lef [glob saed*.lef]"
 
 init_design
 
@@ -76,25 +86,29 @@ checkDesign -powerGround -noHtml -outfile pg.rpt
 
 setDontUse *DELLN* true
 
+createBasicPathGroups -expanded
+
 place_opt_design
+
 ccopt_design
+
 optDesign -postCTS -hold
 #opt_design -post_cts -hold
+
 routeDesign
 #route_design
+
 optDesign -postRoute -setup -hold
 #opt_design -post_route -setup -hold
 
-saveDesign route
+saveDesign ${top_design}_route
 
 # output reports
-set stage genus_phys
-report_qor > ../reports/${top_design}.$stage.qor.rpt
-#report_constraint -all_viol > ../reports/${top_design}.$stage.constraint.rpt
-report_timing -max_path 1000 > ../reports/${top_design}.$stage.timing.max.rpt
-check_timing_intent -verbose  > ../reports/${top_design}.$stage.check_timing.rpt
-check_design  > ../reports/${top_design}.$stage.check_design.rpt
-#check_mv_design  > ../reports/${top_design}.$stage.mvrc.rpt
+set stage route
+timeDesign -postRoute -prefix $stage -outDir ../reports/${top_design}.innovus -expandedViews
+timeDesign -postRoute -si -prefix ${stage}_si -outDir ../reports/${top_design}.innovus -expandedViews
+timeDesign -postRoute -hold -prefix $stage -outDir ../reports/${top_design}.innovus -expandedViews
+timeDesign -postRoute -hold -si -prefix ${stage}_si -outDir ../reports/${top_design}.innovus -expandedViews
 
 # output netlist
 write_hdl $top_design > ../outputs/${top_design}.$stage.vg
