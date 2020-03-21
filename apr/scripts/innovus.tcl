@@ -1,4 +1,10 @@
 
+######
+## WARNING!!!
+## you must start innovus from the INNOVUS area and not the GENUS area
+## /pkgs/cadence/2019-03/INNOVUS171/bin/innovus
+## not /pkgs/cadence/2019-03/GENUS171/bin/innovus
+
 source -echo -verbose ../../$top_design.design_config.tcl
 
 set designs [get_db designs * ]
@@ -10,24 +16,32 @@ set_global _enable_mmmc_by_default_flow      $CTE::mmmc_default
 
 source ../scripts/innovus-get-timlibslefs.tcl
 
+# need to create something more complicated for different link_library for each corner.
+echo create_library_set -name libs_max -timing \"$link_library\" > mmmc.tcl
+#create_op_cond
+echo create_rc_corner -name cmax -T -40 -cap_table ../../cadence_cap_tech/saed32nm_1p9m_Cmax.cap >> mmmc.tcl
+echo create_rc_corner -name cmin -T -40 -cap_table ../../cadence_cap_tech/saed32nm_1p9m_Cmin.cap >> mmmc.tcl
+echo create_rc_corner -name default_rc_corner -T -40 -cap_table ../../cadence_cap_tech/saed32nm_1p9m_Cmax.cap >> mmmc.tcl
+echo create_delay_corner -name max_corner -library_set libs_max -rc_corner cmax >> mmmc.tcl
+echo create_delay_corner -name min_corner -library_set libs_max -rc_corner cmin >> mmmc.tcl
+echo create_constraint_mode -name func_max_sdc -sdc_files ../../constraints/${top_design}.sdc >> mmmc.tcl
+echo create_constraint_mode -name func_min_sdc -sdc_files ../../constraints/${top_design}.sdc >> mmmc.tcl
+echo create_analysis_view -name func_max -delay_corner max_corner -constraint_mode func_max_sdc >> mmmc.tcl
+echo create_analysis_view -name func_min -delay_corner min_corner -constraint_mode func_min_sdc >> mmmc.tcl
+echo set_analysis_view -setup func_max -hold func_min >> mmmc.tcl
+
 set init_design_netlisttype Verilog
 set init_verilog ../../syn/outputs/${top_design}.genus_phys.vg
 set init_top_cell $top_design
 set init_pwr_net VDD
 set init_gnd_net VSS
+set init_mmmc_file mmmc.tcl
 # Currently copy all the lef files from original locations and delete the BUSBITCHARS lines.  The "_" of  "_<>" is a problem.
 set init_lef_file "../../cadence_cap_tech/tech.lef [glob *.lef]"
-#set init_mmmc_file viewDefinition.tcl
 
 init_design
 
-# need to create something more complicated for different link_library for each corner.
-create_library_set -name libs_max -timing $link_library
-create_rc_corner -name cmax -T -40 -cap_table ../../cadence_cap_tech/saed32nm_1p9m_Cmax.cap
-create_constraint_mode -name func_max_sdc -sdc_files ../../constraints/${top_design}.sdc
-create_delay_corner -name max_corner -library_set libs_max -rc_corner cmax
-create_analysis_view -name func_max -delay_corner max_corner -constraint_mode func_max_sdc
-
+set_interactive_constraint_modes [all_constraint_modes -active]
 
 #setPreference EnableRectilinearDesign 1
 #floorPlan -s 1000 400 0 0 0 0 -flip s -site unit
@@ -49,19 +63,29 @@ setPinAssignMode -pinEditInBatch false
 
 
 #loadFPlan
-#globalNetConnect
+clearGlobalNets
+globalNetConnect VDD -type pgpin -pin VDD -inst *
+globalNetConnect VSS -type pgpin -pin VSS -inst *
+
+checkDesign -powerGround -noHtml -outfile pg.rpt
 
 #loadDefFile ../../apr/outputs/${top_design}.floorplan.def
 
-set_interactive_constraint_modes [all_constraint_modes -active]
-source ../../constraints/$top_design.sdc
+#set_interactive_constraint_modes [all_constraint_modes -active]
+#source ../../constraints/$top_design.sdc
+
+setDontUse *DELLN* true
 
 place_opt_design
 ccopt_design
-opt_design -post_cts -hold
-route_design
-opt_design -post_route -setup -hold
+optDesign -postCTS -hold
+#opt_design -post_cts -hold
+routeDesign
+#route_design
+optDesign -postRoute -setup -hold
+#opt_design -post_route -setup -hold
 
+saveDesign route
 
 # output reports
 set stage genus_phys
