@@ -92,6 +92,9 @@ place_opt_design
 
 ccopt_design
 
+setAnalysisMode -analysisType onChipVariation
+setAnalysisMode -cppr both
+
 optDesign -postCTS -hold
 #opt_design -post_cts -hold
 
@@ -110,6 +113,6 @@ timeDesign -postRoute -si -prefix ${stage}_si -outDir ../reports/${top_design}.i
 timeDesign -postRoute -hold -prefix $stage -outDir ../reports/${top_design}.innovus -expandedViews
 timeDesign -postRoute -hold -si -prefix ${stage}_si -outDir ../reports/${top_design}.innovus -expandedViews
 
-# output netlist
-write_hdl $top_design > ../outputs/${top_design}.$stage.vg
+# output netlist.  Look in the Saved Design Directory for the netlist
+#write_hdl $top_design > ../outputs/${top_design}.$stage.vg
 
