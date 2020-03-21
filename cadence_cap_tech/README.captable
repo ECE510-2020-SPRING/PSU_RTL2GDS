@@ -54,9 +54,12 @@ generateLef -techFile /pkgs/synopsys/2016/libs/SAED32_EDK/tech/milkyway/saed32nm
 Use the Milkyway executable to write the Tech.lef.  Output->Lef_out-> Tech only.  Refer to a lib/cel of a current design in ICC1.
 worked in TCL mode at least.  You can click TCL mode, then use the gui 
 Or click tcl mode and put this in the command line
-write_lef -lib_name /u/bcruik2/new-rocket/apr/work/ExampleRocketSystem_lib.mw -output_cell ExampleRocketSystem -output_version 5.7 tech.lef5
+write_lef -lib_name /u/bcruik2/new-rocket/apr/work/ExampleRocketSystem_lib.mw -output_cell ExampleRocketSystem -output_version 5.5 tech.lef5
+write_lef -lib_name /u/bcruik2/ECE581-W2020/FIFO/apr/work/fifo1_lib.mw -output_cell floorplan -output_version 5.5 tech.lef.5.5
 # Need to remove MASK 3 lines that needed to be removed.
 # If you use -output_version 5.7, the MASK lines are not there.
 # TWOWIDTH not starting at 0 problems during route.
 # Version 5.5 uses PARALLELRUNLENGTH instead of TWOWIDTH
+
+# Added the SITE definition for ioSiteNS/EW, cornerSite, fillSite
 

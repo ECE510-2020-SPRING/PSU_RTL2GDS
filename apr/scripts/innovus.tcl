@@ -59,7 +59,11 @@ set_interactive_constraint_modes [all_constraint_modes -active]
 #createRow -area "0 0 1000 300" -site unit
 #createRow -area "500 300 1000 400" -site unit 
 
-floorPlan -s [lindex $design_size 0 ] [lindex $design_size 1 ] $design_io_border $design_io_border $design_io_border $design_io_border -flip s 
+# if no IOs
+#floorPlan -s [lindex $design_size 0 ] [lindex $design_size 1 ] $design_io_border $design_io_border $design_io_border $design_io_border -flip s -coreMarginsBy die
+# If IOs
+floorPlan -s [lindex $design_size 0 ] [lindex $design_size 1 ] 10 10 10 10 -flip s -coreMarginsBy io
+
 #createRow -area "0.0000 0.0000 [lindex $design_size 0 ] [ lindex $design_size 1 ]" -site unit 
 
 #placeInstance fifomem/genblk1_0__U 500 500 W -fixed
