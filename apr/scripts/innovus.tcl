@@ -44,6 +44,7 @@ set init_gnd_net VSS
 set init_mmmc_file mmmc.tcl
 
 # Currently copy all the lef files from original locations and delete the BUSBITCHARS lines.  The "_" of  "_<>" is a problem.
+foreach i [glob -nocomplain saed*.lef ] { file delete $i }
 foreach i $lef_path {
    exec grep -v BUSBITCHARS $i > [file tail $i ]
 }
