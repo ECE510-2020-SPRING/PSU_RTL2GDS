@@ -36,6 +36,9 @@ foreach i $lib_types {
       set n [ string trimright $m "_" ] 
       # Change a ? to a * since there are some extra characters in the lef path in the same spot.
       set n [ regsub {\?} $n {*} ]
+      # further munging the sub_lib_type so that it matches the lef file name.  Synopsys was not fully consistent in their naming.
+      set n [ regsub {_} $n {*} ]
+      set n [ regsub {saed32} $n {saed32*} ]
       foreach j [ glob -nocomplain $lib_dir/lib/$i/lef/${n}*.lef ] {
          lappend lef_path $j
       }
