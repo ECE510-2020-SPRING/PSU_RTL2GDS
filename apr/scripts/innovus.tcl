@@ -68,13 +68,23 @@ floorPlan -s [lindex $design_size 0 ] [lindex $design_size 1 ] 10 10 10 10 -flip
 
 #placeInstance fifomem/genblk1_0__U 500 500 W -fixed
 
-setPinAssignMode -pinEditInBatch true
-editPin -edge 0 -pin [get_attribute [ get_ports wdata* ] full_name ] -layer 5 -spreadDirection clockwise -spreadType START -offsetStart 80 -fixedPin 1
-editPin -edge 1 -pin [get_attribute [ get_ports {rclk rrst_n rinc rempty} ] full_name ] -layer 5 -spreadDirection clockwise -spreadType START -offsetStart 80 -fixedPin 1
-editPin -edge 2 -pin [get_attribute [ get_ports rdata* ] full_name ] -layer 5 -spreadDirection clockwise -spreadType START -offsetStart 80 -fixedPin 1
-editPin -edge 3 -pin [get_attribute [ get_ports {wclk wclk2x wrst_n winc wfull} ] full_name ] -layer 5 -spreadDirection clockwise -spreadType START -offsetStart 80 -fixedPin 1
-setPinAssignMode -pinEditInBatch false
+if { $add_ios } {
+    source ../scripts/innovus-iofile.tcl
+    loadIoFile ${top_design}.io
+} else {
+    setPinAssignMode -pinEditInBatch true
+    # Change to the same layers as the bond pad and space apart by pad distance.
+    editPin -edge 0 -pin [get_attribute [ get_ports -of_obj [ get_nets -of_obj [ get_pins io_l*/PADIO ] ] ] full_name ] -layer MRDL -spreadDirection clockwise -spreadType START -offsetStart 320 -spacing 40 -unit MICRON -fixedPin 0 
+    editPin -edge 1 -pin [get_attribute [ get_ports -of_obj [ get_nets -of_obj [ get_pins io_t*/PADIO ] ] ] full_name ] -layer MRDL -spreadDirection clockwise -spreadType START -offsetStart 320 -spacing 40 -unit MICRON -fixedPin 0
+    editPin -edge 2 -pin [get_attribute [ get_ports -of_obj [ get_nets -of_obj [ get_pins io_r*/PADIO ] ] ] full_name ] -layer MRDL -spreadDirection clockwise -spreadType START -offsetStart 320 -spacing 40 -unit MICRON -fixedPin 0
+    editPin -edge 3 -pin [get_attribute [ get_ports -of_obj [ get_nets -of_obj [ get_pins io_b*/PADIO ] ] ] full_name ] -layer MRDL -spreadDirection clockwise -spreadType START -offsetStart 320 -spacing 40 -unit MICRON -fixedPin 0
+    setPinAssignMode -pinEditInBatch false
+}
 
+# place the IO cells only
+#placeAIO -onlyAIO
+#place IO cells and others including macros
+placeAIO 
 
 #loadFPlan
 clearGlobalNets
@@ -82,6 +92,44 @@ globalNetConnect VDD -type pgpin -pin VDD -inst *
 globalNetConnect VSS -type pgpin -pin VSS -inst *
 
 checkDesign -powerGround -noHtml -outfile pg.rpt
+
+#######
+# Make sure you place the macros before starting the power mesh.  Or maybe remove the -onlyAIO option of the placeAIO -onlyAIO
+######
+
+# Power Grid here.  This is ICC2 version:
+# M7/8 Mesh
+#create_pg_mesh_pattern mesh_pat -layers {  {{vertical_layer: M8} {width: 4} {spacing: interleaving} {pitch: 16}}   \
+#    {{horizontal_layer: M7} {width: 2}        {spacing: interleaving} {pitch: 8}}  }
+#M2 Lower Mesh
+# Orca does 0.350 width VSS two stripes, then 0.7u VDD stripe.  Repeating 16u. for now, do something simpler 
+#create_pg_mesh_pattern lmesh_pat -layers {  {{vertical_layer: M2} {width: 0.7} {spacing: interleaving} {pitch: 16}}  } 
+#M1 Std Cell grid
+#create_pg_std_cell_conn_pattern rail_pat -layers {M1} -rail_width {0.06 0.06}
+#   -via_rule {       {{layers: M6} {layers: M7} {via_master: default}}        {{layers: M8} {layers: M7} {via_master: VIA78_3x3}}}
+#set_pg_strategy mesh_strat -core -extension {{stop:outermost_ring}} -pattern {{pattern:mesh_pat } { nets:{VDD VSS} } } 
+#set_pg_strategy rail_strat -core -pattern {{pattern:rail_pat } { nets:{VDD VSS} } } 
+#set_pg_strategy lmesh_strat -core -pattern {{pattern:lmesh_pat } { nets:{VDD VSS} } } 
+#compile_pg -strategies {mesh_strat rail_strat lmesh_strat}
+
+# Core power ring
+addRing -type core_rings -nets {VDD VSS} -layer {top METAL7 bottom METAL7 left METAL8 right METAL8} -offset 1 -width 8 -spacing 1.0 
+# Add Meshes
+#addStripe -nets {VDD VSS} -direction vertical   -layer M2 -width 0.5 -set_to_set_distance 16 -xleft_offset 2.75 -spacing 5
+#addStripe -nets {VDD VSS} -direction horizontal   -layer M3 -width 0.5 -set_to_set_distance 16 -ybottom_offset 2.75 -spacing 5
+addStripe -nets {VDD VSS} -direction vertical   -layer M4 -width 4 -set_to_set_distance 16 -xleft_offset  1 -spacing 1
+addStripe -nets {VDD VSS} -direction horizontal -layer M7 -width 4 -set_to_set_distance 16 -ybottom_offset 1 -spacing 1
+addStripe -nets {VDD VSS} -direction vertical   -layer M8 -width 4 -set_to_set_distance 16 -xleft_offset  1 -spacing 1
+sroute -connect corePin
+sroute -connect padPin
+
+#return -level 9
+
+# Add dcap boundary cells on the left and right side of design and macros
+#set_boundary_cell_rules -left_boundary_cell [get_lib_cell */DCAP_HVT]
+#set_boundary_cell_rules -right_boundary_cell [get_lib_cell */DCAP_HVT]
+# Tap Cells are usually needed, but they are not in this library. create_tap_cells
+#compile_boundary_cells
 
 #loadDefFile ../../apr/outputs/${top_design}.floorplan.def
 
