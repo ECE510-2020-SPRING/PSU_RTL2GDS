@@ -30,6 +30,15 @@ set_db hdl_parameter_naming_style _%s%d
 # Elaborate the FIFO design
 elaborate $top_design
 
+#return -level 9 
+
+if { [ info exists add_ios ] && $add_ios } {
+   source -echo -verbose ../scripts/genus-add_ios.tcl
+   # Source the design dependent code that will put IOs on different sides
+   source ../../$top_design.add_ios.tcl
+}
+
+# This needs to be after add_ios
 update_names -map { {"." "_" }} -inst -force
 update_names -map {{"[" "_"} {"]" "_"}} -inst -force
 update_names -map {{"[" "_"} {"]" "_"}} -port_bus
@@ -37,9 +46,11 @@ update_names -map {{"[" "_"} {"]" "_"}} -hport_bus
 update_names -inst -hnet -restricted {[} -convert_string "_"
 update_names -inst -hnet -restricted {]} -convert_string "_"
 
+
 # Load the timing and design constraints
 source -echo -verbose ../../constraints/${top_design}.sdc
 
+set_dont_use [get_lib_cells */DELLN* ]
 
 syn_generic
 # any additional non-design specific constraints

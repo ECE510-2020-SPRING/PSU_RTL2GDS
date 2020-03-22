@@ -14,8 +14,17 @@ set_db init_lib_search_path $search_path
 
 set_db library $link_library
 
+# Currently copy all the lef files from original locations and delete the BUSBITCHARS lines.  The "_" of  "_<>" is a problem.
+foreach i [glob -nocomplain saed*.lef ] { file delete $i }
+foreach i $lef_path {
+   exec grep -v BUSBITCHARS $i > [file tail $i ]
+}
+
+# IO lefs are causing issues.  Trying this to allow them to be loaded still.
+#set_db lib_lef_consistency_check_enable false
+
 # Load the tech lef and cell lef files
-set_db lef_library "../../cadence_cap_tech/tech.lef $lef_path"
+set_db lef_library "../../cadence_cap_tech/tech.lef [glob saed*.lef]"
 
 # Do we need this?
 #license checkout Genus_Physical_Opt
@@ -28,11 +37,12 @@ set_db cap_table_file $topdir/cadence_cap_tech/saed32nm_1p9m_Cmax.cap
 # Analyzing the current FIFO design
 read_hdl -language sv ../rtl/${top_design}.sv
 
-set_db hdl_array_naming_style %s_%d
-set_db hdl_instance_array_naming_style %s_%d
-set_db bus_naming_style %s_%d
-set_db hdl_record_naming_style %s_%s
-set_db hdl_parameter_naming_style _%s%d
+#set_db hdl_array_naming_style %s_%d
+#set_db hdl_instance_array_naming_style %s_%d
+#set_db bus_naming_style %s_%d
+#set_db hdl_record_naming_style %s_%s
+#set_db hdl_parameter_naming_style _%s%d
+
 #set_db hdlin_template_naming_style "%s_%p"
 #set_db hdlin_template_parameter_style "%d"
 #set_db hdlin_template_separator_style "_"
@@ -41,6 +51,14 @@ set_db hdl_parameter_naming_style _%s%d
 # Elaborate the FIFO design
 elaborate $top_design
 
+
+if { [ info exists add_ios ] && $add_ios } {
+   source -echo -verbose ../scripts/genus-add_ios.tcl
+   # Source the design dependent code that will put IOs on different sides
+   source ../../$top_design.add_ios.tcl
+}
+
+# This needs to be after add_ios
 update_names -map { {"." "_" }} -inst -force
 update_names -map {{"[" "_"} {"]" "_"}} -inst -force
 update_names -map {{"[" "_"} {"]" "_"}} -port_bus
@@ -52,6 +70,8 @@ update_names -inst -hnet -restricted {]} -convert_string "_"
 source -echo -verbose ../../constraints/${top_design}.sdc
 
 read_def ../../apr/outputs/${top_design}.floorplan.def
+
+set_db auto_ungroup none
 
 syn_generic -physical
 

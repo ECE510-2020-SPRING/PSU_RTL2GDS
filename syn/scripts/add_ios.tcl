@@ -7,7 +7,6 @@ proc insert_io { port side} {
    } else {
     create_cell $this_io saed32io_wb_ss0p95v125c_2p25v/D8I1025_NS
    }
-    set side 2
   }
   if { $side == "b"  } {
    if { [get_attribute [get_port $port ] direction ] == "in" } {
@@ -15,7 +14,6 @@ proc insert_io { port side} {
    } else {
     create_cell $this_io saed32io_wb_ss0p95v125c_2p25v/D8I1025_NS
    }
-    set side 4
   }
   if {  $side == "r"  } {
    if { [get_attribute [get_port $port ] direction ] == "in" } {
@@ -23,7 +21,6 @@ proc insert_io { port side} {
    } else {
     create_cell $this_io saed32io_wb_ss0p95v125c_2p25v/D8I1025_NS
    }
-    set side 3
   }
   if { $side == "l"  } {
    if { [get_attribute [get_port $port ] direction ] == "in" } {
@@ -31,9 +28,7 @@ proc insert_io { port side} {
    } else {
     create_cell $this_io saed32io_wb_ss0p95v125c_2p25v/D8I1025_NS
    }
-    set side 1
   }
-#  set_pad_physical_constraints -side $side -pad_name $this_io
   set pins [ get_pins -of_obj [ get_net $port ] ]
   foreach_in i $pins { disconnect_net [get_net $port ] $i }
   set port_net [get_nets -quiet $port ]
