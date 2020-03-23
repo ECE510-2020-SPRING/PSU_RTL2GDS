@@ -11,7 +11,7 @@ source ../scripts/innovus-get-timlibslefs.tcl
 source ../../constraints/${top_design}.mmmc.sdc
 
 set init_design_netlisttype Verilog
-set init_verilog ../../syn/outputs/${top_design}.genus_phys.vg
+set init_verilog ../../syn/outputs/${top_design}.genus.vg
 set init_top_cell $top_design
 set init_pwr_net VDD
 set init_gnd_net VSS
