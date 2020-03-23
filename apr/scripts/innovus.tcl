@@ -57,14 +57,14 @@ if { [regexp -nocase "f" $flow ] } {
 
     createBasicPathGroups -expanded
 
-    saveDesign ${top_design}_floorplan
+    saveDesign ${top_design}_floorplan.innovus
     puts "######## FINISHED INTIIALIZE and FLOORPLAN #################"
 }
 
 ######## PLACE #################
 if { [regexp -nocase "p" $flow ] } {
     if { ![regexp -nocase "f" $flow ] } {
-       restoreDesign ${top_design}_floorplan
+       restoreDesign ${top_design}_floorplan.innovus.dat ${top_design}
     }
     puts "######## STARTING PLACE #################"
 
@@ -73,7 +73,7 @@ if { [regexp -nocase "p" $flow ] } {
 
     set stage place
     timeDesign -preCTS -prefix $stage -outDir ../reports/${top_design}.innovus -expandedViews
-    saveDesign ${top_design}_place
+    saveDesign ${top_design}_place.innovus
 
     puts "######## FINISHED PLACE #################"
 }
@@ -81,7 +81,7 @@ if { [regexp -nocase "p" $flow ] } {
 ######## STARTING CLOCK_OPT #################
 if { [regexp -nocase "c" $flow ] } {
     if { ![regexp -nocase "f" $flow ] && ![regexp -nocase "p" $flow ]  } {
-       restoreDesign ${top_design}_place
+       restoreDesign ${top_design}_place.innovus.dat ${top_design}
     } elseif { [regexp -nocase "f" $flow ] && ![regexp -nocase "p" $flow ] } {
        puts "FLOW ERROR: You are trying to run route and skipping some but not all earlier stages"
        return -level 1 
@@ -98,7 +98,7 @@ if { [regexp -nocase "c" $flow ] } {
     timeDesign -postCTS -prefix $stage -outDir ../reports/${top_design}.innovus -expandedViews
     timeDesign -postCTS -hold -prefix $stage -outDir ../reports/${top_design}.innovus -expandedViews
 
-    saveDesign ${top_design}_postcts
+    saveDesign ${top_design}_postcts.innovus
     puts "######## FINISHING CLOCK_OPT #################"
 
 }
@@ -106,7 +106,7 @@ if { [regexp -nocase "c" $flow ] } {
 ######## ROUTE_OPT #################
 if { [regexp -nocase "r" $flow ] } {
     if { ![regexp -nocase "f" $flow ] && ![regexp -nocase "p" $flow ] && ![regexp -nocase "c" $flow ] } {
-       restoreDesign ${top_design}_postcts
+       restoreDesign ${top_design}_postcts.innovus.dat ${top_design}
     } elseif { ([regexp -nocase "f" $flow ] && ! [regexp -nocase "p" $flow ] ) ||
                ([regexp -nocase "f" $flow ] && ! [regexp -nocase "c" $flow ] ) ||
                ([regexp -nocase "p" $flow ] && ! [regexp -nocase "c" $flow ] )  } {
@@ -121,7 +121,7 @@ if { [regexp -nocase "r" $flow ] } {
     optDesign -postRoute -setup -hold
     #opt_design -post_route -setup -hold
 
-    saveDesign ${top_design}_route
+    saveDesign ${top_design}_route.innovus
 
     ######## FINAL REPORTS/OUTPUTS  #################
     puts "######## FINAL REPORTS/OUTPUTS  #################"
@@ -135,10 +135,14 @@ if { [regexp -nocase "r" $flow ] } {
 
     # output netlist.  Look in the Saved Design Directory for the netlist
     #write_hdl $top_design > ../outputs/${top_design}.$stage.vg
-    saveNetlist ../outputs/${top_design}.$stage.vg 
+    saveNetlist ../outputs/${top_design}.$stage.innovus.vg 
+    # there is not a command to just write the spef with a specific name, so use the Innovus command, then copy the file.
     saveModel -spef -dir ${top_design}_route_spef
-    foreach i [glob ../outputs/${top_design}_*.spef.gz] { file delete $i  }
-    foreach i [glob ${top_design}_route_spef/*.spef.gz] { file copy $i  ../outputs/ }
+    foreach i [glob ../outputs/${top_design}*innovus*.spef.gz] { file delete $i  }
+    foreach i [glob ${top_design}_route_spef/*.spef.gz] { 
+       set newfile [regsub ${top_design}_ [file tail $i] ${top_design}.route.innovus. ]
+       file copy $i  ../outputs/$newfile 
+    }
 
     puts "######## FINISHED ROUTE_OPT + FINAL REPORTS/OUTPUTS #################"
 }
