@@ -49,4 +49,11 @@ foreach i $lib_types {
 # Add the local directory "." to the search path after we have used it in the above loop.  If you add . before hand, it will cause some problems.
 lappend search_path .
 
+# Currently copy all the lef files from original locations and delete the BUSBITCHARS lines.  The "_" of  "_<>" is a problem.
+foreach i [glob -nocomplain saed*.lef ] { file delete $i }
+foreach i $lef_path {
+   exec grep -v BUSBITCHARS $i > [file tail $i ]
+}
+set init_lef_file "../../cadence_cap_tech/tech.lef [glob saed*.lef]"
+
 

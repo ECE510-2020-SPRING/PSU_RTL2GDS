@@ -26,3 +26,6 @@ foreach_in_collection i [ get_cells io_b* ] {
 }
 echo \) >> ${top_design}.io
 echo \) >> ${top_design}.io
+
+loadIoFile ${top_design}.io
+
