@@ -2,6 +2,12 @@
 create_placement_blockage -type hard_macro -boundary {{10.0 10.0} {1850 50}}
 set_individual_pin_constraints -sides 4 -ports [get_attribute [get_ports ] name ]
 
+#Cadence method.  Not floating with these statements
+#setPinAssignMode -pinEditInBatch true
+#editPin -edge 0 -pin [get_attribute [ get_ports -of_obj [ get_nets -of_obj [ get_pins io_l*/PADIO ] ] ] full_name ] -layer MRDL -spreadDirection clockwise -spreadType START -offsetStart 320 -spacing 40 -unit MICRON -fixedPin 0 
+#setPinAssignMode -pinEditInBatch false
+
+
 ######PLACE
 
 set_app_option -name place.coarse.continue_on_missing_scandef -value true
