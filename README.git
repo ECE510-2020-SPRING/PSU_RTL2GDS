@@ -5,8 +5,9 @@ Common Commands:
   - to see changes you have made since last commit
 - Getting files to be hidden from git status
   - Add to .gitignore in whatever level you want
-- git add
+- git add <filename>
   - to add to a list the files you want to mark as changed.
+  - To add a file that is in the .gitignore:  git add -f <filename> 
   - It can be just changed or a new file.  Or the name of a file you want deleted after you deleted it.
 - git commit -m "message"
   - to commit changes to the repository
@@ -16,17 +17,17 @@ Common Commands:
   - pull all the changes that are in the repository to your local directories.
 - git log --oneline
   - In one line, list each commit_hash version with one line of description.  Can do on one specific file too
-- git blame
+- git blame <filename>
   - Check for who changed each line of the file and when
-- git diff filename
+- git diff <filename>
   - Check for differences between your current filename and what is the latest in the repository
-- git <commit_hash> filename
+- git <commit_hash> <filename>
   - Check the differences between the filename and the commit_hash indicated
-- git <commit_hash> <commit_hash> filename 
+- git <commit_hash> <commit_hash> <filename> 
   - Check the differences between two different commit_hashes for a filename
-- git checkout -- filename
+- git checkout -- <filename>
   - revert your filename back to what was last saved in the repository
-- git checkout <commit_hash> -- filename
+- git checkout <commit_hash> -- <filename>
   - revert your filename back to some earlier version saved in the repository
 - git reset --hard
   - Reverts all files in your entire repository to the repository head
