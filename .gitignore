@@ -1,9 +1,4 @@
-*.rpt
-*.log*
 *~
-*.ddc
-*.cmd*
-*.mw
 icc2_output.txt
 check_design.ems
 
