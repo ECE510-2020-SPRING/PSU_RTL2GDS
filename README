@@ -1,3 +1,7 @@
+# For Innovus flows, add this to ~/.profile after doing the appropriate addpkg
+  alias innovus='/pkgs/cadence/2019-03/INNOVUS171/bin/innovus'
+  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/pkgs/cadence/2019-03/SSV171/tools.lnx86/lib/64bit/"
+
 # Run Synthesis to generate a starting netlist non-physical synthesis.
 cd ~/PSU_RTL2GDS/syn/work
 dc_shell   (or genus)

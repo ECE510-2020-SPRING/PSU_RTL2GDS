@@ -4,9 +4,11 @@
 ## you must start innovus from the INNOVUS area and not the GENUS area
 ## /pkgs/cadence/2019-03/INNOVUS171/bin/innovus
 ## not /pkgs/cadence/2019-03/GENUS171/bin/innovus
+## Add this to ~/.profile
+## export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/pkgs/cadence/2019-03/SSV171/tools.lnx86/lib/64bit/"
 ##
-## You need this as well in your .profile to get your libraries loaded correctly
-## LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/pkgs/cadence/2019-03/SSV171/tools.lnx86/lib/64bit/"
+## You need this as well in your ~/.profile to get your libraries loaded correctly
+## export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/pkgs/cadence/2019-03/SSV171/tools.lnx86/lib/64bit/"
 ## You might see this error otherwise.
 ## **ERROR: (IMPCCOPT-3092):	Couldn't load external LP solver library. Error returned:
 
