@@ -38,4 +38,5 @@ alias _ measure_time
 alias o {puts "setting top_design to: " ; set top_design ORCA_TOP}
 alias e {puts "setting top_design to: " ; set top_design ExampleRocketSystem}
 alias f {puts "setting top_design to: " ; set top_design fifo1}
+alias fs {puts "setting top_design to: " ; set top_design fifo1_sram}
 

@@ -17,11 +17,11 @@ set_db library $link_library
 # Analyzing the current FIFO design
 read_hdl -language sv ../rtl/${top_design}.sv
 
-set_db hdl_array_naming_style %s_%d
-set_db hdl_instance_array_naming_style %s_%d
-set_db bus_naming_style %s_%d
-set_db hdl_record_naming_style %s_%s
-set_db hdl_parameter_naming_style _%s%d
+#set_db hdl_array_naming_style %s_%d
+#set_db hdl_instance_array_naming_style %s_%d
+#set_db bus_naming_style %s_%d
+#set_db hdl_record_naming_style %s_%s
+#set_db hdl_parameter_naming_style _%s%d
 #set_db hdlin_template_naming_style "%s_%p"
 #set_db hdlin_template_parameter_style "%d"
 #set_db hdlin_template_separator_style "_"
