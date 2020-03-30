@@ -1,5 +1,6 @@
 # This is design dependent code to put IOs on particular sides of the block
 proc get_port_names { port_collection } {
+global synopsys_program_name
     if [ info exists synopsys_program_name ] {
        return [join [ get_attribute $port_collection full_name ] ]
     } else {
@@ -7,10 +8,10 @@ proc get_port_names { port_collection } {
     }
 }
 
-foreach i [get_port_names [ get_port rdata* ] ]  {
+foreach i [get_port_names [ get_ports rdata* ] ]  {
   insert_io  $i l 
 }
-foreach i [ get_port_names [ get_port wdata* ] ] {
+foreach i [ get_port_names [ get_ports wdata* ] ] {
   insert_io  $i r 
 }
 foreach i { rempty wfull }  {

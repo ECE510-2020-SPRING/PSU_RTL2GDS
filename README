@@ -6,7 +6,7 @@
 cd ~/PSU_RTL2GDS/syn/work
 dc_shell   (or genus)
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup and genus_startup.tcl
-f
+fs
 source ../scripts/dc.tcl    (or ../scripts/genus.tcl)
 # it is recommended to exit the shell before sourcing the TCL script again.
 exit
@@ -15,7 +15,7 @@ exit
 cd ../../apr/work
 icc_shell2  (or innovus)
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup and enc.tcl
-f
+fs
 source ../scripts/floorplan-macros2.tcl  (or ../scripts/floorplan-macros-innovus.tcl)
 exit
 
@@ -23,7 +23,7 @@ exit
 cd ../../apr/work
 icc_shell2  (or (innovus)
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup and enc.tcl
-f
+fs
 source ../scripts/create_dct_floorplan2.tcl  (or ../scripts/create_genus_floorplan.tcl)
 exit
 
@@ -31,7 +31,7 @@ exit
 cd ../../syn/work
 dc_shell -topo  (or genus)
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup and genus_startup.tcl
-f
+fs
 source ../scripts/dct.tcl (or ../scripts/genus-phys.tcl)
 # it is recommended to exit the shell before sourcing the TCL script again.
 exit
@@ -40,7 +40,7 @@ exit
 cd ../../apr/work
 icc_shell2  (or innovus)
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup and enc.tcl
-f
+fs
 # If you only want to run part of the flow, you can set flow "fpcr"  where f=floorplan, p=place, c=clock, r=route.
 source ../scripts/icc2.tcl  (or ../scripts/innovus.tcl)
 # If you rerun flow, either close_lib, then rerun, or exit the icc2_shell and reenter.  (or just source ../scripts/innovus.tcl?)
@@ -53,17 +53,17 @@ cd ../../pt/work
 # FOR DMSA setup and hold combined use if you have been successful with README.DMSA.SSH 
 pt_shell -multi_scenario
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup
-f
+fs
 source ../scripts/dmsa.tcl
 exit
 
 # If you are not successful yet with README.DMSA.SSH 
 pt_shell 
-f
+fs
 source ../scripts/pt_max.tcl
 exit
 pt_shell
-f
+fs
 source ../sripts/pt_min.tcl
 exit
 
