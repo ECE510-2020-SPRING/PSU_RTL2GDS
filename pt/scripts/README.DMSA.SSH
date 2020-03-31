@@ -3,7 +3,9 @@ DMSA (Distributed Multi-Scenario Analysis) works by distributing different scena
 Follow something like what is described in this link:
 https://www.tecmint.com/ssh-passwordless-login-using-ssh-keygen-in-5-easy-steps/
 
-Which is roughly:
+if ~/.ssh/authorized_keys exists as a directory, remove the directory and its contents
+
+Then do this roughly:
 
 ssh-keygen -t rsa
 cd ~
