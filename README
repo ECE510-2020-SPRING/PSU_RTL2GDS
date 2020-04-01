@@ -3,7 +3,8 @@
   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/pkgs/cadence/2019-03/SSV171/tools.lnx86/lib/64bit/"
 
 # Run Synthesis to generate a starting netlist non-physical synthesis.
-cd ~/PSU_RTL2GDS/syn/work
+# cd inside your clone or work area
+cd syn/work
 dc_shell   (or genus)
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup and genus_startup.tcl
 fs
@@ -46,9 +47,8 @@ source ../scripts/icc2.tcl  (or ../scripts/innovus.tcl)
 # If you rerun flow, either close_lib, then rerun, or exit the icc2_shell and reenter.  (or just source ../scripts/innovus.tcl?)
 exit
 
-# Check results in Primetime Static Timing Analysis in 3 modes
-# Follow directions at pt/scripts/README.DMSA.SSH 
 cd ../../pt/work
+# Follow directions at pt/scripts/README.DMSA.SSH 
 
 # FOR DMSA setup and hold combined use if you have been successful with README.DMSA.SSH 
 pt_shell -multi_scenario
@@ -57,7 +57,7 @@ fs
 source ../scripts/dmsa.tcl
 exit
 
-# If you are not successful yet with README.DMSA.SSH 
+# If you are not successful yet with README.DMSA.SSH.  The output is the same as with DMSA, but requires two separate runs.
 pt_shell 
 fs
 source ../scripts/pt_max.tcl
