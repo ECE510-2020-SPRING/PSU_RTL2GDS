@@ -21,9 +21,9 @@ Common Commands:
   - Check for who changed each line of the file and when
 - git diff <filename>
   - Check for differences between your current filename and what is the latest in the repository
-- git <commit_hash> <filename>
+- git diff <commit_hash> <filename>
   - Check the differences between the filename and the commit_hash indicated
-- git <commit_hash> <commit_hash> <filename> 
+- git diff <commit_hash> <commit_hash> <filename> 
   - Check the differences between two different commit_hashes for a filename
 - git checkout -- <filename>
   - revert your filename back to what was last saved in the repository
