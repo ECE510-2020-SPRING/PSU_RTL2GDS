@@ -33,7 +33,8 @@ checkDesign -powerGround -noHtml -outfile pg.rpt
 #compile_pg -strategies {mesh_strat rail_strat lmesh_strat}
 
 # Core power ring
-addRing -type core_rings -nets {VDD VSS} -layer {top METAL7 bottom METAL7 left METAL8 right METAL8} -offset 1 -width 8 -spacing 1.0 
+#addRing -type core_rings -nets {VDD VSS} -layer {top METAL7 bottom METAL7 left METAL8 right METAL8} -offset 1 -width 8 -spacing 1.0 
+addRing -type core_rings -nets {VDD VSS} -layer {top M7 bottom M7 left M8 right M8} -offset 1 -width 4 -spacing 1.0
 # Add Meshes
 #addStripe -nets {VDD VSS} -direction vertical   -layer M2 -width 0.5 -set_to_set_distance 16 -xleft_offset 2.75 -spacing 5
 #addStripe -nets {VDD VSS} -direction horizontal   -layer M3 -width 0.5 -set_to_set_distance 16 -ybottom_offset 2.75 -spacing 5
