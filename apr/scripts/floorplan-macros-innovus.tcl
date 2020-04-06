@@ -45,6 +45,10 @@ placeAIO
 
 #defOut -noStdCells -noTracks -noSpecialNet -noTracks  "../outputs/${top_design}.floorplan.innovus.macros.def"
 
+# For q quick place do this
+# setPlaceMode -fp true
+# place_design -noPrePlaceOpt
+
 deselectAll
 select_obj [ get_ports * ]
 select_obj [ get_db insts -if ".is_black_box==true" ]
