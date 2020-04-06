@@ -73,8 +73,8 @@ puts "Logfile message: writing def file now..."
 
 write_def -include {rows_tracks vias specialnets nets cells ports blockages } -cell_types {macro pad corner} "../outputs/${top_design}.floorplan.def"
 
-
-write_def -include {cells ports blockages } -cell_types {macro pad corner} "../outputs/${top_design}.floorplan.macros.def"
+# Comment this out.  Let's not overwrite what was created earlier for this.
+#write_def -include {cells ports blockages } -cell_types {macro pad corner} "../outputs/${top_design}.floorplan.macros.def"
 
 puts "Logfile message: writing def file completed ..."
 
