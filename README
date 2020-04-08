@@ -1,13 +1,9 @@
-# If you are doing cadence tools, do all cadence items in parenthesis.
-# If doing synopsys, do all the first commands.
-# Don't mix and match.
 # For Innovus flows, add this to ~/.profile after doing the appropriate addpkg
   alias innovus='/pkgs/cadence/2019-03/INNOVUS171/bin/innovus'
   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/pkgs/cadence/2019-03/SSV171/tools.lnx86/lib/64bit/"
 
 # Run Synthesis to generate a starting netlist non-physical synthesis.
-# cd inside your clone or work area
-cd syn/work
+cd ~/PSU_RTL2GDS/syn/work
 dc_shell   (or genus)
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup and genus_startup.tcl
 fs
@@ -17,7 +13,7 @@ exit
 
 # Run P&R to generate a starting Floorplan with IOs for use in Synth.  Also a spot to move macros around and save results.
 cd ../../apr/work
-icc_shell2  (or innovus)
+icc2_shell  (or innovus)
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup and enc.tcl
 fs
 source ../scripts/floorplan-macros2.tcl  (or ../scripts/floorplan-macros-innovus.tcl)
@@ -25,7 +21,7 @@ exit
 
 # Run P&R to generate a floorplan for Synth
 cd ../../apr/work
-icc_shell2  (or (innovus)
+icc2_shell  (or (innovus)
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup and enc.tcl
 fs
 source ../scripts/create_dct_floorplan2.tcl  (or ../scripts/create_genus_floorplan.tcl)
@@ -42,7 +38,7 @@ exit
 
 # Rerun ICC and start with the physical synth netlist and proceed through full P&R flow
 cd ../../apr/work
-icc_shell2  (or innovus)
+icc2_shell  (or innovus)
 # Indicate to set the top design to fifo1.  There is an alias defined in .synopsys_dc.setup and enc.tcl
 fs
 # If you only want to run part of the flow, you can set flow "fpcr"  where f=floorplan, p=place, c=clock, r=route.
@@ -50,8 +46,9 @@ source ../scripts/icc2.tcl  (or ../scripts/innovus.tcl)
 # If you rerun flow, either close_lib, then rerun, or exit the icc2_shell and reenter.  (or just source ../scripts/innovus.tcl?)
 exit
 
-cd ../../pt/work
+# Check results in Primetime Static Timing Analysis in 3 modes
 # Follow directions at pt/scripts/README.DMSA.SSH 
+cd ../../pt/work
 
 # FOR DMSA setup and hold combined use if you have been successful with README.DMSA.SSH 
 pt_shell -multi_scenario
@@ -60,7 +57,7 @@ fs
 source ../scripts/dmsa.tcl
 exit
 
-# If you are not successful yet with README.DMSA.SSH.  The output is the same as with DMSA, but requires two separate runs.
+# If you are not successful yet with README.DMSA.SSH 
 pt_shell 
 fs
 source ../scripts/pt_max.tcl
