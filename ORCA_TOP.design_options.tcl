@@ -1,9 +1,13 @@
 ####### FLOORPLANNING OPTIONS
-    create_placement_blockage -type hard_macro -boundary {{10.0 10.0} {1000 50}}
+if { [sizeof_collection [get_placement_blockage io_pblockage ] ] ==0 } {
+   create_placement_blockage -type hard_macro -boundary {{10.0 10.0} {1000 50}} -name io_pblockage
+}
     set_individual_pin_constraints -sides 4 -ports [get_attribute [get_ports ] name ]
 #load_upf ../../syn/outputs/ORCA_TOP.dc.upf.place_2020
 
-create_voltage_area  -region {{580 0} {1000 400}} -power_domains PD_RISC_CORE
+if { [ sizeof_collection [get_voltage_areas * ] ] == 0 } {
+   create_voltage_area  -region {{580 0} {1000 400}} -power_domains PD_RISC_CORE
+}
 
 ######PLACE
 
@@ -28,11 +32,30 @@ set_ignored_layers  -min_routing_layer M2 -max_routing_layer M7
 #set_ahfs_options -remove_effort high
 #set_buffer_opt_strategy -effort medium
 
-# Dont use delay buffers
-#set_dont_use [get_lib_cells */DELLN* ]
-set_lib_cell_purpose -include hold [get_lib_cells */DELLN* ]
+###########################  CTS Related
+create_routing_rule clock_double_spacing -spacings {M1 0.1 M2 0.112 M3 0.112 M4 0.112 M5 0.112 M6 0.112 M7 0.112 M8 0.112}
+#set_clock_routing_rules -clock [ get_clocks * ] -net_type leaf -rule clock_double_spacing -max_routing_layer M6 -min_routing_layer M3
+set_clock_routing_rules -clock [ get_clocks * ] -net_type internal -rule clock_double_spacing -max_routing_layer M6 -min_routing_layer M3
+set_clock_routing_rules -clock [ get_clocks * ] -net_type root -rule clock_double_spacing -max_routing_layer M6 -min_routing_layer M3
+# Set other cts app_options?  Bufs vs Inverters, certain drive strengths.
+set cts_clks [get_clocks {SDRAM_CLK SYS_2x_CLK SYS_CLK PCI_CLK} ]
+# don't allow X16 or X32.  They are extremely high drive and could cause EM problems.
+set_lib_cell_purpose -include none [get_lib_cell {*/*X16* */*X32*} ]
+# dont allow INV* for CTS since I think they are unbalanced rise/fall
+set_lib_cell_purpose -exclude cts [ get_lib_cell */INV* ]
+# potentially try to disallow IBUF (inverter buffers) or NBUF (non-inverting buffers) to see if all inverters or all buffers makes a difference
+#set_lib_cell_purpose -exclude cts [ get_lib_cell */IBUF* ]
+#set_lib_cell_purpose -exclude cts [ get_lib_cell */NBUF* ]
+# dont allow slower cells on clock trees.  
+set_lib_cell_purpose -exclude cts [ get_lib_cell { */*HVT */*RVT } ]
+set_max_transition 0.1 -clock_path $cts_clks 
+# Other potential options
+# set_max_capacitance cap_value -clock_path $cts_clks
+# set_app_option -name cts.common.max_net_length  -value float
+# set_app_option -name cts.common.max_fanout  -value <2-1000000>
+# set_clock_tree_options -target_skew value -clock $cts_clks 
+# set_clock_tree_options -target_latency value -clock $cts_clks
 
-#FIXME
 #set_host_options -max_cores 1 -num_processes 1 mo.ece.pdx.edu
 set_app_options -name place_opt.flow.enable_ccd -value false
 set_app_options -name clock_opt.flow.enable_ccd -value false
@@ -40,11 +63,6 @@ set_app_options -name route_opt.flow.enable_ccd -value false
 set_app_options -name ccd.max_postpone -value 0
 set_app_options -name ccd.max_prepone -value 0
 
-###########################  CTS Related
-create_routing_rule clock_double_spacing -spacings {M1 0.1 M2 0.112 M3 0.112 M4 0.112 M5 0.112 M6 0.112 M7 0.112 M8 0.112}
-set_clock_routing_rules -clock [ get_clocks * ] -net_type internal -rule clock_double_spacing -max_routing_layer M6 -min_routing_layer M3
-set_clock_routing_rules -clock [ get_clocks * ] -net_type root -rule clock_double_spacing -max_routing_layer M6 -min_routing_layer M3
-# Set other cts app_options?  Bufs vs Inverters, certain drive strengths.  
 
 # Allow delay buffers just for hold fixing
 #set_prefer -min [get_lib_cells */DELLN*HVT ]
@@ -56,6 +74,11 @@ set_clock_routing_rules -clock [ get_clocks * ] -net_type root -rule clock_doubl
 # Sometimes better to separate CTS and setup/hold so any hold concerns can be seen before hold fixing.
 # Can look in the log at the beginning of clock_opt hold fixing to see if there was a large hold problem to fix.
 # set_app_option -name clock_opt.flow.skip_hold -value true
+
+# Dont use delay buffers
+#set_dont_use [get_lib_cells */DELLN* ]
+set_lib_cell_purpose -include none [get_lib_cells */DELLN* ]
+set_lib_cell_purpose -include hold [get_lib_cells */DELLN* ]
 
 ########################## Route related
 set_app_option -name route_opt.flow.xtalk_reduction -value true

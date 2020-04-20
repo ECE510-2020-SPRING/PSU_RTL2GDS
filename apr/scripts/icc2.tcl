@@ -26,7 +26,7 @@ proc std_reporting { top_design stage } {
 source -echo -verbose ../../$top_design.design_config.tcl
 set my_lib ${top_design}_lib
 
-if { ! [ info exists flow ] } { set flow "fpcr" }
+if { ! [ info exists flow ] } { set flow "fpcor" }
 
 ####### STARTING INITIALIZE and FLOORPLAN #################
 if { [regexp -nocase "f" $flow ] } {
@@ -53,10 +53,11 @@ if { [regexp -nocase "f" $flow ] } {
 
 ######## PLACE #################
 if { [regexp -nocase "p" $flow ] } {
-    if { ![regexp -nocase "f" $flow ] } {
+    if { [regexp -nocase "^p" $flow ] } {
        open_lib $my_lib
        copy_block -from floorplan -to $top_design
        open_block $top_design
+       source -echo -verbose ../../$top_design.design_options.tcl
     }
 
 
@@ -73,38 +74,62 @@ if { [regexp -nocase "p" $flow ] } {
 
 }
 
-######## STARTING CLOCK_OPT #################
+######## STARTING CTS #################
 if { [regexp -nocase "c" $flow ] } {
-    if { ![regexp -nocase "f" $flow ] && ![regexp -nocase "p" $flow ]  } {
+    if { [regexp "^c" $flow] } {
        open_lib $my_lib
        copy_block -from place2 -to $top_design
        open_block $top_design
-    } elseif { [regexp -nocase "f" $flow ] && ![regexp -nocase "p" $flow ] } {
+       source -echo -verbose ../../$top_design.design_options.tcl
+    } elseif { ![regexp "^fpc" $flow ] && ![regexp "^pc" $flow ] } {
        puts "FLOW ERROR: You are trying to run route and skipping some but not all earlier stages"
        return -level 1 
     }
 
-    puts "######## STARTING CLOCK_OPT #################"
+    puts "######## STARTING CTS #################"
     # Reduce uncertainty since we are inserting clock trees
     set_clock_uncertainty -setup 0.060 [get_clocks *]
 
-    clock_opt 
+    clock_opt -from build_clock -to route_clock
+
+    std_reporting $top_design postcts2
+    save_block -as cts2
+    puts "######## FINISHING CTS #################"
+
+}
+
+######## STARTING POST-CTS OPT #################
+if { [regexp -nocase "o" $flow ] } {
+    if { [regexp "^o" $flow] } {
+       open_lib $my_lib
+       copy_block -from cts2 -to $top_design
+       open_block $top_design
+       source -echo -verbose ../../$top_design.design_options.tcl
+    } elseif { ![regexp "^fpco" $flow ] && ![regexp "^pco" $flow ] && ![regexp "^co" $flow ]} {
+       puts "FLOW ERROR: You are trying to run route and skipping some but not all earlier stages"
+       return -level 1 
+    }
+
+    puts "######## STARTING POST-CTS OPT #################"
+    # Reduce uncertainty since we are inserting clock trees
+    set_clock_uncertainty -setup 0.060 [get_clocks *]
+
+    clock_opt -from final_opto -to final_opto
 
     std_reporting $top_design postcts2
     save_block -as postcts2
-    puts "######## FINISHING CLOCK_OPT #################"
+    puts "######## FINISHING POST-CTS OPT #################"
 
 }
 
 ######## ROUTE_OPT #################
 if { [regexp -nocase "r" $flow ] } {
-    if { ![regexp -nocase "f" $flow ] && ![regexp -nocase "p" $flow ] && ![regexp -nocase "c" $flow ] } {
+    if { [regexp "^r" $flow] } {
        open_lib $my_lib
        copy_block -from postcts2 -to $top_design
        open_block $top_design
-    } elseif { ([regexp -nocase "f" $flow ] && ! [regexp -nocase "p" $flow ] ) ||
-               ([regexp -nocase "f" $flow ] && ! [regexp -nocase "c" $flow ] ) ||
-               ([regexp -nocase "p" $flow ] && ! [regexp -nocase "c" $flow ] )  } {
+       source -echo -verbose ../../$top_design.design_options.tcl
+    } elseif { ![regexp "^fpcor" $flow ] && ![regexp "^pcor" $flow ] && ![regexp "^cor" $flow ] && ![regexp "^or" $flow ] } {
        puts "FLOW ERROR: You are trying to run route and skipping some but not all earlier stages"
        return -level 1 
     }
