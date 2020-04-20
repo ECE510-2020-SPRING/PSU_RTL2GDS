@@ -92,7 +92,7 @@ if { [regexp -nocase "c" $flow ] } {
 
     clock_opt -from build_clock -to route_clock
 
-    std_reporting $top_design postcts2
+    std_reporting $top_design cts2
     save_block -as cts2
     puts "######## FINISHING CTS #################"
 
