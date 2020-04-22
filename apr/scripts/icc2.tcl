@@ -15,6 +15,7 @@
 #####################################################
 proc std_reporting { top_design stage } {
 	report_qor > ../reports/${top_design}.$stage.qor.rpt
+        report_clock_qor > ../reports/${top_design}.$stage.clock_qor.rpt
         report_constraint -all_viol > ../reports/${top_design}.$stage.constraint.rpt
 	report_timing -delay max -input -tran -cross -sig 4 -derate -net -cap  -path full_clock_expanded -max_path 10000 -slack_less 0 > ../reports/${top_design}.$stage.timing.max.full_clock.rpt
 	report_timing -delay max -input -tran -cross -sig 4 -derate -net -cap  -max_path 10000 -slack_less 0 > ../reports/${top_design}.$stage.timing.max.rpt
