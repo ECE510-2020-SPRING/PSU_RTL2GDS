@@ -46,13 +46,19 @@ if { [regexp -nocase "f" $flow ] } {
 
     source -echo -verbose ../../$top_design.design_options.tcl
 
+if { [file exists ../scripts/${top_design}.pre.floorplan.tcl ] { source -echo -verbose ../scripts/${top_design}.pre.floorplan.tcl }
+
     source -echo -verbose ../scripts/floorplan2.tcl
     #read_def ../outputs/${top_design}.floorplan.def
+
+if { [file exists ../scripts/${top_design}.post.floorplan.tcl ] { source -echo -verbose ../scripts/${top_design}.post.floorplan.tcl }
 
     save_block -as floorplan
     puts "######## FINISHED INTIIALIZE and FLOORPLAN #################"
 
 }
+
+if { [file exists ../scripts/${top_design}.pre.place.tcl ] { source -echo -verbose ../scripts/${top_design}.pre.place.tcl }
 
 ######## PLACE #################
 if { [regexp -nocase "p" $flow ] } {
@@ -67,6 +73,8 @@ if { [regexp -nocase "p" $flow ] } {
     puts "######## STARTING PLACE #################"
     place_opt  
 
+if { [file exists ../scripts/${top_design}.post.place.tcl ] { source -echo -verbose ../scripts/${top_design}.post.place.tcl }
+
     std_reporting $top_design place2
     save_block -as place2
 
@@ -76,6 +84,8 @@ if { [regexp -nocase "p" $flow ] } {
     puts "######## FINISHED PLACE #################"
 
 }
+
+if { [file exists ../scripts/${top_design}.pre.cts.tcl ] { source -echo -verbose ../scripts/${top_design}.pre.cts.tcl }
 
 ######## STARTING CTS #################
 if { [regexp -nocase "c" $flow ] } {
@@ -95,11 +105,15 @@ if { [regexp -nocase "c" $flow ] } {
 
     clock_opt -from build_clock -to route_clock
 
+if { [file exists ../scripts/${top_design}.post.cts.tcl ] { source -echo -verbose ../scripts/${top_design}.post.cts.tcl }
+
     std_reporting $top_design cts2
     save_block -as cts2
     puts "######## FINISHING CTS #################"
 
 }
+
+if { [file exists ../scripts/${top_design}.pre.opt.tcl ] { source -echo -verbose ../scripts/${top_design}.pre.opt.tcl }
 
 ######## STARTING POST-CTS OPT #################
 if { [regexp -nocase "o" $flow ] } {
@@ -119,11 +133,15 @@ if { [regexp -nocase "o" $flow ] } {
 
     clock_opt -from final_opto -to final_opto
 
+if { [file exists ../scripts/${top_design}.post.opt.tcl ] { source -echo -verbose ../scripts/${top_design}.post.opt.tcl }
+
     std_reporting $top_design postcts2
     save_block -as postcts2
     puts "######## FINISHING POST-CTS OPT #################"
 
 }
+
+if { [file exists ../scripts/${top_design}.pre.route.tcl ] { source -echo -verbose ../scripts/${top_design}.pre.route.tcl }
 
 ######## ROUTE_OPT #################
 if { [regexp -nocase "r" $flow ] } {
@@ -147,6 +165,9 @@ if { [regexp -nocase "r" $flow ] } {
     route_opt
 
     create_stdcell_fillers -lib_cells "saed32rvt_c/SHFILL128_RVT saed32rvt_c/SHFILL64_RVT saed32rvt_c/SHFILL3_RVT saed32rvt_c/SHFILL2_RVT saed32rvt_c/SHFILL1_RVT"
+
+if { [file exists ../scripts/${top_design}.post.route.tcl ] { source -echo -verbose ../scripts/${top_design}.post.route.tcl }
+
 
     save_block -as route2
     save_block -as $top_design
