@@ -1,4 +1,8 @@
 *~
+*.ddc
+*.cmd*
+*.log*
+*.mw
 icc2_output.txt
 check_design.ems
 
