@@ -181,7 +181,7 @@ if { [regexp -nocase "r" $flow ] } {
     #set_si_options -delta_delay true -static_noise true -timing_window true -min_delta_delay true -static_noise_threshold_above_low 0.35 -static_noise_threshold_below_high 0.35 -route_xtalk_prevention true -route_xtalk_prevention_threshold 0.45
 
     #extract_rc -coupling_cap
-    write_verilog -nosplit -compress gzip ../outputs/${top_design}.route2.vg
+    write_verilog  -compress gzip ../outputs/${top_design}.route2.vg
     write_parasitics -compress -output ../outputs/${top_design}.route2
     save_upf ../outputs/${top_design}.route2.upf
     set stage route2
