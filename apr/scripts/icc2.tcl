@@ -16,11 +16,11 @@
 proc std_reporting { top_design stage } {
 	report_qor > ../reports/${top_design}.$stage.qor.rpt
         report_clock_qor > ../reports/${top_design}.$stage.clock_qor.rpt
-        report_constraint -all_viol > ../reports/${top_design}.$stage.constraint.rpt
-	report_timing -delay max -input -tran -cross -sig 4 -derate -net -cap  -path full_clock_expanded -max_path 1000 -slack_less 0 > ../reports/${top_design}.$stage.timing.max.full_clock.rpt
-        exec gzip ../reports/${top_design}.$stage.timing.max.full_clock.rpt
-	report_timing -delay max -input -tran -cross -sig 4 -derate -net -cap  -max_path 1000 -slack_less 0 > ../reports/${top_design}.$stage.timing.max.rpt
-        exec gzip ../reports/${top_design}.$stage.timing.max.rpt
+        report_constraint -nosplit -all_viol > ../reports/${top_design}.$stage.constraint.rpt
+	report_timing -nosplit -delay max -input -tran -cross -sig 4 -derate -net -cap  -path full_clock_expanded -max_path 1000 -slack_less 0 > ../reports/${top_design}.$stage.timing.max.full_clock.rpt
+        exec gzip -f ../reports/${top_design}.$stage.timing.max.full_clock.rpt
+	report_timing -nosplit -delay max -input -tran -cross -sig 4 -derate -net -cap  -max_path 1000 -slack_less 0 > ../reports/${top_design}.$stage.timing.max.rpt
+        exec gzip -f ../reports/${top_design}.$stage.timing.max.rpt
 }
 
 #####################################################
@@ -32,6 +32,7 @@ set my_lib ${top_design}_lib
 if { ! [ info exists flow ] } { set flow "fpcor" }
 
 ####### STARTING INITIALIZE and FLOORPLAN #################
+
 if { [regexp -nocase "f" $flow ] } {
     puts "######## STARTING INITIALIZE and FLOORPLAN #################"
 
@@ -46,19 +47,18 @@ if { [regexp -nocase "f" $flow ] } {
 
     source -echo -verbose ../../$top_design.design_options.tcl
 
-if { [file exists ../scripts/${top_design}.pre.floorplan.tcl ] { source -echo -verbose ../scripts/${top_design}.pre.floorplan.tcl }
+    if { [file exists ../scripts/${top_design}.pre.floorplan.tcl ] } { source -echo -verbose ../scripts/${top_design}.pre.floorplan.tcl }
 
     source -echo -verbose ../scripts/floorplan2.tcl
     #read_def ../outputs/${top_design}.floorplan.def
 
-if { [file exists ../scripts/${top_design}.post.floorplan.tcl ] { source -echo -verbose ../scripts/${top_design}.post.floorplan.tcl }
+    if { [file exists ../scripts/${top_design}.post.floorplan.tcl ] } { source -echo -verbose ../scripts/${top_design}.post.floorplan.tcl }
 
     save_block -as floorplan
     puts "######## FINISHED INTIIALIZE and FLOORPLAN #################"
 
 }
 
-if { [file exists ../scripts/${top_design}.pre.place.tcl ] { source -echo -verbose ../scripts/${top_design}.pre.place.tcl }
 
 ######## PLACE #################
 if { [regexp -nocase "p" $flow ] } {
@@ -69,11 +69,12 @@ if { [regexp -nocase "p" $flow ] } {
        source -echo -verbose ../../$top_design.design_options.tcl
     }
 
+    if { [file exists ../scripts/${top_design}.pre.place.tcl ] } { source -echo -verbose ../scripts/${top_design}.pre.place.tcl }
 
     puts "######## STARTING PLACE #################"
     place_opt  
 
-if { [file exists ../scripts/${top_design}.post.place.tcl ] { source -echo -verbose ../scripts/${top_design}.post.place.tcl }
+    if { [file exists ../scripts/${top_design}.post.place.tcl ] } { source -echo -verbose ../scripts/${top_design}.post.place.tcl }
 
     std_reporting $top_design place2
     save_block -as place2
@@ -85,7 +86,6 @@ if { [file exists ../scripts/${top_design}.post.place.tcl ] { source -echo -verb
 
 }
 
-if { [file exists ../scripts/${top_design}.pre.cts.tcl ] { source -echo -verbose ../scripts/${top_design}.pre.cts.tcl }
 
 ######## STARTING CTS #################
 if { [regexp -nocase "c" $flow ] } {
@@ -103,17 +103,17 @@ if { [regexp -nocase "c" $flow ] } {
     # Reduce uncertainty since we are inserting clock trees
     set_clock_uncertainty -setup 0.060 [get_clocks *]
 
+    if { [file exists ../scripts/${top_design}.pre.cts.tcl ] } { source -echo -verbose ../scripts/${top_design}.pre.cts.tcl }
+
     clock_opt -from build_clock -to route_clock
 
-if { [file exists ../scripts/${top_design}.post.cts.tcl ] { source -echo -verbose ../scripts/${top_design}.post.cts.tcl }
+    if { [file exists ../scripts/${top_design}.post.cts.tcl ] } { source -echo -verbose ../scripts/${top_design}.post.cts.tcl }
 
     std_reporting $top_design cts2
     save_block -as cts2
     puts "######## FINISHING CTS #################"
 
 }
-
-if { [file exists ../scripts/${top_design}.pre.opt.tcl ] { source -echo -verbose ../scripts/${top_design}.pre.opt.tcl }
 
 ######## STARTING POST-CTS OPT #################
 if { [regexp -nocase "o" $flow ] } {
@@ -131,17 +131,17 @@ if { [regexp -nocase "o" $flow ] } {
     # Reduce uncertainty since we are inserting clock trees
     set_clock_uncertainty -setup 0.060 [get_clocks *]
 
+    if { [file exists ../scripts/${top_design}.pre.opt.tcl ] } { source -echo -verbose ../scripts/${top_design}.pre.opt.tcl }
+
     clock_opt -from final_opto -to final_opto
 
-if { [file exists ../scripts/${top_design}.post.opt.tcl ] { source -echo -verbose ../scripts/${top_design}.post.opt.tcl }
+    if { [file exists ../scripts/${top_design}.post.opt.tcl ] } { source -echo -verbose ../scripts/${top_design}.post.opt.tcl }
 
     std_reporting $top_design postcts2
     save_block -as postcts2
     puts "######## FINISHING POST-CTS OPT #################"
 
 }
-
-if { [file exists ../scripts/${top_design}.pre.route.tcl ] { source -echo -verbose ../scripts/${top_design}.pre.route.tcl }
 
 ######## ROUTE_OPT #################
 if { [regexp -nocase "r" $flow ] } {
@@ -160,13 +160,15 @@ if { [regexp -nocase "r" $flow ] } {
     #foreach net {VDD} { derive_pg_connection -power_net $net -power_pin $net -create_ports top}
     #foreach net {VSS} { derive_pg_connection -ground_net $net -ground_pin $net -create_ports top}
 
+    if { [file exists ../scripts/${top_design}.pre.route.tcl ] } { source -echo -verbose ../scripts/${top_design}.pre.route.tcl }
+
     route_auto
 
     route_opt
 
     create_stdcell_fillers -lib_cells "saed32rvt_c/SHFILL128_RVT saed32rvt_c/SHFILL64_RVT saed32rvt_c/SHFILL3_RVT saed32rvt_c/SHFILL2_RVT saed32rvt_c/SHFILL1_RVT"
 
-if { [file exists ../scripts/${top_design}.post.route.tcl ] { source -echo -verbose ../scripts/${top_design}.post.route.tcl }
+    if { [file exists ../scripts/${top_design}.post.route.tcl ] } { source -echo -verbose ../scripts/${top_design}.post.route.tcl }
 
 
     save_block -as route2
@@ -179,7 +181,7 @@ if { [file exists ../scripts/${top_design}.post.route.tcl ] { source -echo -verb
     #set_si_options -delta_delay true -static_noise true -timing_window true -min_delta_delay true -static_noise_threshold_above_low 0.35 -static_noise_threshold_below_high 0.35 -route_xtalk_prevention true -route_xtalk_prevention_threshold 0.45
 
     #extract_rc -coupling_cap
-    write_verilog -compress gzip ../outputs/${top_design}.route2.vg
+    write_verilog -nosplit -compress gzip ../outputs/${top_design}.route2.vg
     write_parasitics -compress -output ../outputs/${top_design}.route2
     save_upf ../outputs/${top_design}.route2.upf
     set stage route2
