@@ -27,10 +27,13 @@ Common Commands:
   - Check the differences between two different commit_hashes for a filename
 - git checkout -- <filename>
   - revert your filename back to what was last saved in the repository
-- git checkout <commit_hash> -- <filename>
+- git checkout <commit_hash>  <filename>
   - revert your filename back to some earlier version saved in the repository
+  - Get the version from git log --oneline <filename>
 - git reset --hard
   - Reverts all files in your entire repository to the repository head
+- git reset --soft HEAD~1
+  - Undo your last commit, but don't change the files.  Can be useful if there were problems with git push -u origin master
 - git tag -a version_name -m "version comment/description"
   - adding a tag to a version of your repository
   - Push to github with: git push origin version_name
