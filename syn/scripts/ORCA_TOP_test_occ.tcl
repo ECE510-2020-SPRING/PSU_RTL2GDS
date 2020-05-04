@@ -2,11 +2,10 @@ write -format verilog -hier -output ../outputs/${top_design}.dct.predft.vg
 write -hier -format ddc -output ../outputs/${top_design}.dct.predft.ddc
 save_upf ../outputs/${top_design}.dct.predft.upf
 
-
 #Insert DFT  
 set dftclk_ports { pclk sdram_clk sys_2x_clk }
 set dftgenclk {I_CLOCKING/sys_clk_in_reg/Q }
-#set_dft_signal -view existing_dft -type ScanClock -port $dftclk_ports -timing [list 45 55]
+set_dft_signal -view existing_dft -type ScanClock -port $dftclk_ports -timing [list 45 55]
 
 # if there are any resets or generated clocks, they should have a mux and be controllable by ports during test
 set_dft_signal -port {prst_n} -active_state 0 -view existing_dft -type Reset
@@ -14,10 +13,8 @@ set_dft_signal -port {prst_n} -active_state 0 -view existing_dft -type Reset
 # This is for the te pin for test enable on a clock gating cell inserted by power compiler
 set_dft_signal -view spec -port [get_ports test_si* ] -type ScanDataIn
 set_dft_signal -view spec -port [get_ports test_so* ] -type ScanDataOut
-set_dft_signal -port scan_enable -active_state 1 -view existing -type ScanEnable 
+set_dft_signal -port scan_enable -active_state 1 -view existing -type ScanEnable
 set_dft_signal -port test_mode -active_state 1 -view existing -type TestMode
-set_dft_signal -port scan_enable -active_state 1 -view existing -type ScanEnable 
-set_dft_signal -port occ_bypass -active_state 1 -view existing -type TestMode
 
 #######################################################################################
 #OCC and at speed scan
@@ -27,11 +24,25 @@ set_dft_signal -port occ_bypass -active_state 1 -view existing -type TestMode
 #ATE clocks
 
 set_dft_signal -view existing_dft -type ScanClock -port ate_clk -timing [list 45 55]
+set_dft_signal -view existing_dft -type Oscillator -port ate_clk
+set_dft_signal -view existing_dft -type Oscillator -port $dftclk_ports 
+set_dft_signal -view existing_dft -type Oscillator -hookup_pin $dftgenclk
+
+#enabling on chip clock support
+set_dft_configuration -clock_controller enable
+
+#this command specifies the OCC Controller design to be instantiated. The DFT compiler
+#synthesized clock controller is named snps_clk_mux
+
+set_dft_clock_controller -cell_name occ_int1 -design_name snps_clk_mux1 -pllclocks  $dftgenclk -ateclocks ate_clk -cycles_per_clock 2 -chain_count 1
+set_dft_clock_controller -cell_name occ_int2 -design_name snps_clk_mux2 -pllclocks $dftclk_ports -ateclocks ate_clk -cycles_per_clock 2 -chain_count 1
 
 
 #set_scan_configuration -chain_count 3
 #set_scan_configuration -chain_count 30 -clock_mixing no_mix
 
+set_dft_signal -view existing_dft -type pll_reset -port occ_reset
+set_dft_signal -view existing_dft -type pll_bypass -port occ_bypass
 
 #set_dft_clock_gating_pin CGLPPRX2_LVT -pin_name TE
 set_dft_clock_gating_pin [get_cell -of_obj [get_pins -hier */TE ] ] -pin_name TE
@@ -53,22 +64,7 @@ set_app_var test_dedicated_clock_chain_clock true
 
 ##########################################################################################
 
-#Add top level test_occ_bypass = occ_bypass & test_mode
-create_cell test_occ_bypass saed32hvt_ss0p75vn40c/AND2X1_HVT
-connect_pin -from occ_bypass -to test_occ_bypass/A1 -port_name occ_bypass
-connect_pin -from test_mode -to test_occ_bypass/A2 -port_name test_mode
-create_net test_occ_bypass_net 
-connect_net test_occ_bypass_net [get_pin  test_occ_bypass/Y ]
 
-# mux the div clock
-create_cell I_CLOCKING/dftclkmux saed32hvt_ss0p75vn40c/MUX21X1_HVT
-set clkpin [ get_pin I_CLOCKING/sys_clk_in_reg/Q ]
-set clknet [ get_net -of_obj $clkpin ]
-disconnect_net $clknet $clkpin
-connect_pin -from $clkpin -to I_CLOCKING/dftclkmux/A1 
-connect_pin -from test_occ_bypass/Y -to I_CLOCKING/dftclkmux/S0 -port test_occ_bypass
-connect_net $clknet I_CLOCKING/dftclkmux/Y
-connect_pin -from ate_clk -to I_CLOCKING/dftclkmux/A2 -port_name ate_clk
 
 # And off the resets FFs
 foreach_in_collection i [ get_pins I_CLOCKING/*rst* -filter "direction==out" ] {
@@ -80,22 +76,6 @@ foreach_in_collection i [ get_pins I_CLOCKING/*rst* -filter "direction==out" ] {
    connect_net $drv_net I_CLOCKING/${name}_testctl/Y
    connect_pin -from test_mode -to  I_CLOCKING/${name}_testctl/A1 -port_name test_mode
    connect_pin -from $driver -to I_CLOCKING/${name}_testctl/A2 
-}
-
-# mux the port clocks together
-foreach clkport $dftclk_ports {
-    set port_net [get_net -of_obj [ get_port $clkport ] ]
-    set clkpins [ get_pins -of_obj $port_net  ] 
-    create_net ${clkport}_mux_net
-    create_cell ${clkport}_mux saed32hvt_ss0p75vn40c/MUX21X1_HVT
-    connect_net ${clkport}_mux_net ${clkport}_mux/Y
-    foreach i $clkpins {
-      disconnect_net $port_net $i
-      connect_net ${clkport}_mux_net $i
-    }
-    connect_net $port_net ${clkport}_mux/A1 
-    connect_net [get_net ate_clk ] ${clkport}_mux/A2
-    connect_net [get_net -of_obj [ get_pin test_occ_bypass/Y ] ] ${clkport}_mux/S0
 }
 
 #Connect the SE pins of the clock gaters.  It isn't happening automatically.
@@ -113,35 +93,52 @@ connect_pin -from scan_enable -to $i -port_name scan_enable
 #set_scan_configuration -replace false
 set_app_var compile_seqmap_identify_shift_registers false
 
-create_test_protocol -infer_clock -infer_asynch
-dft_drc -pre_dft 
+set_app_var test_icg_p_ref_for_dft CGLNPRX2_LVT
+
+#create_test_protocol -infer_clock -infer_asynch
+# infer will catch the pll_reset asynch.
+create_test_protocol -infer_clock -infer_asynch 
+dft_drc -pre_dft  
+dft_drc -pre_dft -verbose > ../reports/${top_design}.dct.dft2.predft.drc.verbose.rpt
+dft_drc -pre_dft  > ../reports/${top_design}.dct.dft2.predft.drc.rpt
 preview_dft -show all
 insert_dft
 dft_drc 
+dft_drc -verbose > ../reports/${top_design}.dct.dft2.drc.verbose.rpt
+dft_drc  > ../reports/${top_design}.dct.dft2.drc.rpt
+
+# This is stitching and inserting OCC, but it is getting dft_drc errors after insert_dft.  Need to debug.
+
+#run drc with external clocks enabled during capture (PLL bypassed)
+#set_dft_drc_configuration -pll_bypass enable
+#remove_test_protocol
+#create_test_protocol
+#dft_drc -verbose > dft.pll_bypass.rpt 
+#dft_drc  > dft.pll_bypass.rpt 
+
 
 compile_ultra -scan -incremental  -no_autoungroup
 
-write_test_protocol -output ../outputs/${top_design}.dct.scan.dft.stil
+write_test_protocol -output ../outputs/${top_design}.dct.dft2.scan.stil
 
 set_app_var compile_seqmap_identify_shift_registers false
 #Compile Incr done after DFT insertion
 #compile_ultra -scan -incremental 
 
-report_scan_path -test_mode -all > ../reports/${top_design}.dct.dft.scan.rpt
+report_scan_path -test_mode -all > ../reports/${top_design}.dct.dft2.scan.rpt
 
-write -format verilog -hier -output ../outputs/${top_design}.dct.dft.vg
+write -format verilog -hier -output ../outputs/${top_design}.dct.dft2.vg
 write -format verilog -hier -output ../outputs/${top_design}.dct.vg
 
-write_scan_def -output ../outputs/${top_design}.dct.dft.scan.def
+write_scan_def -output ../outputs/${top_design}.dct.dft2.scan.def
 write_scan_def -output ../outputs/${top_design}.dct.scan.def
-write -hier -format ddc -output ../outputs/${top_design}.dct.dft.ddc
+write -hier -format ddc -output ../outputs/${top_design}.dct.dft2.ddc
 write -hier -format ddc -output ../outputs/${top_design}.dct.ddc
-save_upf ../outputs/${top_design}.dct.dft.upf
+save_upf ../outputs/${top_design}.dct.dft2.upf
 save_upf ../outputs/${top_design}.dct.upf
 
 # To check test mode, make sure to do the following
 #set_case_analysis 1 occ_bypass
 #set_case_analysis 1 scan_enable
 #set_case_analysis 1 test_mode
-
 
