@@ -26,12 +26,15 @@ switch $synopsys_program_name {
     }
 
     source ../../constraints/ORCA_TOP_func_worst.sdc
+
+    set_false_path -from SDRAM_CLK -to SD_DDR_CLK
  }
  "dc_shell" {
      set upf_create_implicit_supply_sets false
     source ../../constraints/ORCA_TOP.upf
     set_operating_conditions ss0p75vn40c -library saed32lvt_ss0p75vn40c
     source ../../constraints/ORCA_TOP_func_worst.sdc
+    set_false_path -from SDRAM_CLK -to SD_DDR_CLK
 
     # Define voltage area for DCT mode.  We define the mw_lib variable in DCT mode script.
     # In the ICC2_flow it is defined in ORCA_TOP.design_options.tcl. Slightly different syntax.
