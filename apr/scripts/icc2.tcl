@@ -36,6 +36,9 @@ if { ! [ info exists flow ] } { set flow "fpcor" }
 if { [regexp -nocase "f" $flow ] } {
     puts "######## STARTING INITIALIZE and FLOORPLAN #################"
 
+    # Use the DCT netlist
+    set dc_floorplanning 0
+
     source -echo -verbose ../scripts/setup2.tcl
     source -echo -verbose ../scripts/read2.tcl
 
