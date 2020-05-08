@@ -39,8 +39,8 @@ set rtl_list [list ../rtl/$top_design.sv ]
 
 set slow_corner "ss0p75vn40c ss0p75vn40c_i0p95v ss0p75vn40c_i0p75v ss0p95vn40c ss0p95vn40c_i0p75v"
 set fast_corner "ff0p95vn40c ff0p95vn40c_i1p16v ff0p95vn40c_i0p95v ff1p16vn40c ff1p16vn40c_i1p16v ff1p16vn40c_i0p95v"
-set slow_metal 1p9m_Cmax_-40
-set fast_metal 1p9m_Cmax_-40
+set slow_metal Cmax_-40
+set fast_metal Cmax_-40
 set synth_corners $slow_corner
 set lib_types "stdcell_hvt stdcell_rvt stdcell_lvt sram"
 # Get just the main standard cells, srams

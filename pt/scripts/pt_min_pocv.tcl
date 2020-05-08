@@ -8,7 +8,7 @@ set corners $fast_corner
 
 source $topdir/pt/scripts/pt-get-timlibs.tcl
 
-read_verilog $topdir/apr/outputs/${top_design}.route2.vg
+read_verilog $topdir/apr/outputs/${top_design}.route2.vg.gz
 current_design ${top_design}
 link
 set_app_var si_enable_analysis true
@@ -26,6 +26,7 @@ set_propagated_clock [ all_clocks ]
 # set flat timing derate?
 #set_timing_derate -early 0.9
 #set_timing_derate -late 1.1
+reset_timing_derate
 set_app_var timing_pocvm_enable_analysis true
 #set_app_var timing_aocvm_analysis_mode combined_launch_capture_depth
 set_app_var timing_ocvm_enable_distance_analysis false

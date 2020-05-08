@@ -44,15 +44,13 @@ switch $synopsys_program_name {
  }
  "pt_shell" {
     source $topdir/apr/outputs/ORCA_TOP.route2.upf
-    switch $corner_name {
-     "max" {
+    if [ regexp "max" $corner_name ] {
         set_operating_conditions ss0p75vn40c -library saed32lvt_ss0p75vn40c
         source $topdir/constraints/ORCA_TOP_func_worst.sdc
-      }
-     "min" {
+    }
+    if [ regexp "min" $corner_name]  {
         set_operating_conditions ff0p95vn40c -library saed32lvt_ff0p95vn40c
         source $topdir/constraints/ORCA_TOP_func_best.sdc
-     }
     }
  }
 }
