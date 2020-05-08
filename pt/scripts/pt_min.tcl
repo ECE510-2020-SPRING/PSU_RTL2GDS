@@ -8,7 +8,7 @@ set corners $fast_corner
 
 source $topdir/pt/scripts/pt-get-timlibs.tcl
 
-read_verilog $topdir/apr/outputs/${top_design}.route2.vg
+read_verilog $topdir/apr/outputs/${top_design}.route2.vg.gz
 #read_verilog ../../apr/outputs/${top_design}.route2.vg
 current_design ${top_design}
 link
