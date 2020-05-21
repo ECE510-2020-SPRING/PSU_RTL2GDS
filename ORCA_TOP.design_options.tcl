@@ -5,7 +5,7 @@ if { [sizeof_collection [get_placement_blockage io_pblockage ] ] ==0 } {
     set_individual_pin_constraints -sides 4 -ports [get_attribute [get_ports ] name ]
 #load_upf ../../syn/outputs/ORCA_TOP.dc.upf.place_2020
 
-if { [ sizeof_collection [get_voltage_areas * ] ] == 0 } {
+if { [ sizeof_collection [get_voltage_areas * ] ] < 2 } {
    create_voltage_area  -region {{580 0} {1000 400}} -power_domains PD_RISC_CORE
 }
 
