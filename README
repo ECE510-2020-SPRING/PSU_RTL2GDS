@@ -1,6 +1,8 @@
 testing: adding change from ece510/psu clone area
 testing2: adding change from ece510/psu clone area
 
+testing: adding from test clone area
+
 # For Innovus flows, add this to ~/.profile after doing the appropriate addpkg
   alias innovus='/pkgs/cadence/2019-03/INNOVUS171/bin/innovus'
   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/pkgs/cadence/2019-03/SSV171/tools.lnx86/lib/64bit/"
